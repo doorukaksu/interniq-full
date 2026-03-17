@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { FileText, Upload, ArrowLeft, Loader2, RotateCcw } from "lucide-react";
+import { FileText, Upload, ArrowLeft, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router";
 import { analyzeCV } from "../lib/api";
 import AnalysisResults from "./AnalysisResults";
@@ -30,7 +30,21 @@ export default function OptimizePage() {
     }
     setUploadedFile(file);
     setPdfDataUrl(URL.createObjectURL(file));
-    // clear any previous results
+    setResult(null);
+    setAppState("idle");
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      setErrorMessage("Please upload a PDF file.");
+      setAppState("error");
+      return;
+    }
+    setUploadedFile(file);
+    setPdfDataUrl(URL.createObjectURL(file));
     setResult(null);
     setAppState("idle");
   };
@@ -58,7 +72,8 @@ export default function OptimizePage() {
         throw new Error(response.error ?? "Analysis failed. Please try again.");
       }
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      setErrorMessage(msg);
       setAppState("error");
     }
   };
@@ -70,20 +85,18 @@ export default function OptimizePage() {
   };
 
   const canAnalyze = !!uploadedFile && jobDescription.trim().length > 20;
+  const isRateLimited = errorMessage.toLowerCase().includes("too many requests");
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Navigation */}
       <nav className="border-b border-border sticky top-0 bg-background z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => navigate("/")}
-          >
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <FileText className="w-6 h-6" />
-            <span className="text-xl tracking-tight">CVOptimize</span>
+            <span className="text-xl tracking-tight">InternIQ</span>
           </div>
           <div className="flex items-center gap-4">
             {appState === "results" && (
@@ -106,9 +119,9 @@ export default function OptimizePage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
         <div className="mb-8">
-          <h1 className="text-4xl mb-3">Optimize Your CV</h1>
+          <h1 className="text-4xl mb-3">Optimise Your CV</h1>
           <p className="text-muted-foreground">
             Upload your CV and paste the job description for an instant AI analysis.
           </p>
@@ -130,16 +143,18 @@ export default function OptimizePage() {
               />
 
               {!uploadedFile ? (
-                <button
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-border rounded-lg p-12 hover:border-primary/50 hover:bg-secondary/30 transition-colors flex flex-col items-center gap-4"
+                  className="w-full border-2 border-dashed border-border rounded-lg p-12 hover:border-primary/50 hover:bg-secondary/30 transition-colors flex flex-col items-center gap-4 cursor-pointer"
                 >
                   <Upload className="w-12 h-12 text-muted-foreground" />
                   <div className="text-center">
-                    <p className="mb-1">Click to upload your CV</p>
-                    <p className="text-sm text-muted-foreground">PDF format only</p>
+                    <p className="mb-1">Click or drag to upload your CV</p>
+                    <p className="text-sm text-muted-foreground">PDF format only · Max 5MB</p>
                   </div>
-                </button>
+                </div>
               ) : (
                 <div className="border border-border rounded-lg p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -159,6 +174,19 @@ export default function OptimizePage() {
                   </button>
                 </div>
               )}
+
+              {/* Privacy trust statement */}
+              <div className="flex items-start gap-2 mt-3 p-3 bg-secondary/50 rounded-lg">
+                <ShieldCheck className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Your CV is processed in memory and{" "}
+                  <span className="font-medium text-foreground">never stored on our servers</span>.
+                  It is deleted immediately after analysis.{" "}
+                  <a href="/privacy" className="underline hover:text-foreground transition-colors">
+                    Privacy policy
+                  </a>
+                </p>
+              </div>
             </div>
 
             {/* Job Description */}
@@ -183,8 +211,13 @@ export default function OptimizePage() {
 
             {/* Error state */}
             {appState === "error" && (
-              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
-                <p className="text-sm text-destructive">{errorMessage}</p>
+              <div className={`border rounded-xl p-4 ${isRateLimited ? "bg-yellow-50 border-yellow-200" : "bg-destructive/10 border-destructive/30"}`}>
+                <p className={`text-sm font-medium mb-1 ${isRateLimited ? "text-yellow-800" : "text-destructive"}`}>
+                  {isRateLimited ? "Rate limit reached" : "Analysis failed"}
+                </p>
+                <p className={`text-sm ${isRateLimited ? "text-yellow-700" : "text-destructive/80"}`}>
+                  {errorMessage}
+                </p>
               </div>
             )}
 
@@ -229,11 +262,7 @@ export default function OptimizePage() {
               <div className="bg-card border border-border rounded-xl p-6">
                 <h3 className="mb-4">CV Preview</h3>
                 <div className="bg-muted rounded-lg overflow-hidden h-[calc(100vh-300px)]">
-                  <iframe
-                    src={pdfDataUrl}
-                    className="w-full h-full"
-                    title="CV Preview"
-                  />
+                  <iframe src={pdfDataUrl} className="w-full h-full" title="CV Preview" />
                 </div>
               </div>
             ) : (
@@ -251,6 +280,21 @@ export default function OptimizePage() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-6 mt-8">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">© 2026 InternIQ</p>
+          <div className="flex items-center gap-6">
+            <a href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Terms of Service
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

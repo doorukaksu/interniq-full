@@ -176,14 +176,16 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
-              <span className="tracking-tight">CVOptimize</span>
+              <span className="tracking-tight">InternIQ</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2026 CVOptimize. Designed for ambitious professionals.
-            </p>
+            <div className="flex items-center gap-6">
+              <a href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
+              <a href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+              <p className="text-sm text-muted-foreground">© 2026 InternIQ</p>
+            </div>
           </div>
         </div>
       </footer>
