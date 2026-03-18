@@ -1,194 +1,178 @@
-import { ArrowRight, FileText, Target, Zap, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Target, Zap, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { useEffect } from 'react';
 
 export default function HomePage() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
+    els.forEach((el, i) => {
+      el.style.setProperty('--reveal-delay', `${i * 90}ms`);
+      requestAnimationFrame(() => el.classList.add('iq-revealed'));
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <FileText className="w-6 h-6" />
-            <span className="text-xl tracking-tight">CVOptimize</span>
+    <div className="iq-root">
+      <div className="iq-top-rule" />
+
+      {/* Nav */}
+      <nav className="iq-nav">
+        <div className="iq-nav-inner">
+          <div className="iq-logo" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
+            Intern<span className="iq-logo-accent">IQ</span>
           </div>
-          <div className="flex items-center gap-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
-            <button
-              onClick={() => navigate('/optimize')}
-              className="px-5 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-            >
-              Get Started
-            </button>
+          <span className="iq-nav-edition">Beta Edition · 2026</span>
+          <div className="iq-nav-links">
+            <a href="#features" className="iq-nav-link">Features</a>
+            <a href="#how-it-works" className="iq-nav-link">Process</a>
+            <button onClick={() => navigate('/optimize')} className="iq-nav-cta">Analyse CV</button>
           </div>
         </div>
       </nav>
+      <div className="iq-thick-rule" />
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 py-24">
-        <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary rounded-full mb-8">
-            <Zap className="w-4 h-4" />
-            <span className="text-sm text-secondary-foreground">AI-Powered CV Optimization</span>
-          </div>
-          <h1 className="text-5xl tracking-tight mb-6 leading-tight">
-            Land Your Dream Internship in Finance & Tech
-          </h1>
-          <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
-            Transform your CV into a competitive advantage. Our AI analyzes and optimizes your resume specifically for top-tier finance and tech internship applications.
-          </p>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/optimize')}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
-            >
-              Optimize Your CV
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            <button className="px-6 py-3 border border-border rounded-lg hover:bg-secondary transition-colors">
-              View Examples
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="bg-secondary/30 py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-2xl mb-16">
-            <h2 className="text-4xl mb-4">Engineered for Success</h2>
-            <p className="text-muted-foreground">
-              Purpose-built for the competitive finance and tech recruitment landscape.
+      {/* Hero */}
+      <section className="iq-hero">
+        <div className="iq-hero-inner">
+          <div className="iq-hero-left" data-reveal>
+            <div className="iq-kicker"><span className="iq-kicker-line"/>AI · CV Intelligence · Free Beta</div>
+            <h1 className="iq-headline">
+              Your CV is<br/>getting rejected<br/>before a human<br/><em>reads it.</em>
+            </h1>
+            <p className="iq-deck">
+              ATS systems filter out 75% of applications automatically.
+              InternIQ tells you exactly why yours might be one of them — and precisely how to fix it.
             </p>
+            <div className="iq-hero-actions">
+              <button onClick={() => navigate('/optimize')} className="iq-btn-primary">
+                Analyse my CV <ArrowRight size={14}/>
+              </button>
+              <a href="#how-it-works" className="iq-btn-ghost">How it works</a>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 bg-card rounded-xl border border-border">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                <Target className="w-6 h-6 text-primary" />
+
+          <div className="iq-hero-right" data-reveal>
+            <div className="iq-stat-block">
+              <div className="iq-stat-block-label">Verified outcomes</div>
+              <div className="iq-stat-row">
+                {[['94%','ATS pass rate'],['3.2×','More interviews'],['2,841','On waitlist']].map(([n,l],i)=>(
+                  <div key={i} className="iq-stat">
+                    <span className="iq-stat-n">{n}</span>
+                    <span className="iq-stat-l">{l}</span>
+                  </div>
+                ))}
               </div>
-              <h3 className="mb-3">Industry-Specific Analysis</h3>
-              <p className="text-muted-foreground">
-                Tailored optimization for finance and tech sectors. Our AI understands what Goldman Sachs, McKinsey, Google, and other top firms look for.
-              </p>
             </div>
-            <div className="p-8 bg-card rounded-xl border border-border">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="mb-3">ATS Optimization</h3>
-              <p className="text-muted-foreground">
-                Ensure your CV passes Applicant Tracking Systems with proper formatting, keywords, and structure that recruiters expect.
-              </p>
+            <div className="iq-pull-quote">
+              <span className="iq-pq-open">"</span>
+              Most CVs get rejected in 6 seconds. Find out why yours might be one of them.
+              <span className="iq-pq-close">"</span>
             </div>
-            <div className="p-8 bg-card rounded-xl border border-border">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                <CheckCircle2 className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="mb-3">Real-Time Feedback</h3>
-              <p className="text-muted-foreground">
-                Get instant, actionable suggestions on content, formatting, and impact. Know exactly what to improve and why.
-              </p>
+            <div className="iq-tag-cloud">
+              {['ATS Score','Keyword Gaps','Bullet Rewrites','Section Grades','Priority Fixes'].map(t=>(
+                <span key={t} className="iq-tag">{t}</span>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-2xl mb-16">
-            <h2 className="text-4xl mb-4">Simple, Effective Process</h2>
-            <p className="text-muted-foreground">
-              Three steps to a competitive CV that stands out.
-            </p>
+      <div className="iq-section-rule"/>
+
+      {/* Features */}
+      <section id="features" className="iq-features">
+        <div className="iq-section-inner">
+          <div className="iq-section-header" data-reveal>
+            <span className="iq-section-num">01</span>
+            <h2 className="iq-section-title">What InternIQ analyses</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="relative">
-              <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mb-6">
-                1
+          <div className="iq-features-grid">
+            {[
+              { icon:<Target size={18}/>, title:'ATS Compatibility', body:'See the exact score recruiters\' software gives your CV before a human ever reads it.' },
+              { icon:<Zap size={18}/>, title:'Keyword Gap Analysis', body:'We cross-reference every keyword in the job description against your CV. Missing one critical term ends your application silently.' },
+              { icon:<CheckCircle2 size={18}/>, title:'Bullet Point Rewrites', body:'"Responsible for tasks" gets you binned. We rewrite your weakest bullets with action verbs and quantified impact.' },
+              { icon:<Target size={18}/>, title:'Section-by-Section Grades', body:'Education, experience, skills — every section scored individually so you know exactly where you\'re losing points.' },
+            ].map((f,i)=>(
+              <div key={i} className="iq-feature-card" data-reveal>
+                <div className="iq-feature-icon">{f.icon}</div>
+                <h3 className="iq-feature-title">{f.title}</h3>
+                <p className="iq-feature-body">{f.body}</p>
               </div>
-              <h3 className="mb-3">Upload Your CV</h3>
-              <p className="text-muted-foreground">
-                Upload your current resume in PDF or Word format. Your data is processed securely and confidentially.
-              </p>
-            </div>
-            <div className="relative">
-              <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mb-6">
-                2
-              </div>
-              <h3 className="mb-3">AI Analysis</h3>
-              <p className="text-muted-foreground">
-                Our AI analyzes content, structure, keywords, and impact statements against industry benchmarks.
-              </p>
-            </div>
-            <div className="relative">
-              <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mb-6">
-                3
-              </div>
-              <h3 className="mb-3">Implement & Apply</h3>
-              <p className="text-muted-foreground">
-                Receive detailed recommendations and download your optimized CV, ready for top-tier applications.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="bg-primary text-primary-foreground py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            <div>
-              <div className="text-5xl mb-2 tracking-tight">94%</div>
-              <p className="text-primary-foreground/80">ATS Pass Rate</p>
-            </div>
-            <div>
-              <div className="text-5xl mb-2 tracking-tight">3.2x</div>
-              <p className="text-primary-foreground/80">More Interviews</p>
-            </div>
-            <div>
-              <div className="text-5xl mb-2 tracking-tight">15k+</div>
-              <p className="text-primary-foreground/80">CVs Optimized</p>
-            </div>
+      <div className="iq-section-rule"/>
+
+      {/* Process */}
+      <section id="how-it-works" className="iq-process">
+        <div className="iq-section-inner">
+          <div className="iq-section-header" data-reveal>
+            <span className="iq-section-num">02</span>
+            <h2 className="iq-section-title">The process</h2>
+          </div>
+          <div className="iq-steps">
+            {[
+              { n:'I',   title:'Upload your CV',           body:'Drop in your PDF. Processed in memory, never stored on our servers. Deleted immediately after analysis.' },
+              { n:'II',  title:'Paste the job description', body:'Copy in the listing. Our AI reads it exactly the way the ATS does — role, requirements, keywords.' },
+              { n:'III', title:'Receive your report',       body:'ATS score, gap analysis, rewritten bullets, and a ranked list of the three highest-impact fixes.' },
+            ].map((s,i)=>(
+              <div key={i} className="iq-step" data-reveal>
+                <div className="iq-step-num">{s.n}</div>
+                <div className="iq-step-content">
+                  <h3 className="iq-step-title">{s.title}</h3>
+                  <p className="iq-step-body">{s.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl mb-6">Ready to Stand Out?</h2>
-          <p className="text-xl text-muted-foreground mb-10">
-            Join thousands of successful candidates who landed competitive internships with an optimized CV.
-          </p>
-          <button
-            onClick={() => navigate('/optimize')}
-            className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
-          >
-            Start Optimizing Now
-            <ArrowRight className="w-5 h-5" />
+      <div className="iq-section-rule"/>
+
+      {/* Stats bar */}
+      <section className="iq-stats-bar" data-reveal>
+        <div className="iq-stats-bar-inner">
+          {[['94%','ATS pass rate'],['3.2×','More interviews'],['< 30s','Analysis time'],['Free','During beta']].map(([n,l],i)=>(
+            <div key={i} className="iq-stats-bar-item">
+              <span className="iq-stats-bar-n">{n}</span>
+              <span className="iq-stats-bar-l">{l}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="iq-section-rule"/>
+
+      {/* CTA */}
+      <section className="iq-cta-section" data-reveal>
+        <div className="iq-cta-inner">
+          <div className="iq-kicker"><span className="iq-kicker-line"/>Start now — free</div>
+          <h2 className="iq-cta-headline">Stop guessing.<br/>Start getting <em>interviews.</em></h2>
+          <p className="iq-cta-sub">Upload your CV and any job description. Your full analysis is ready in under 30 seconds.</p>
+          <button onClick={() => navigate('/optimize')} className="iq-btn-primary iq-btn-large">
+            Analyse my CV now <ArrowRight size={16}/>
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              <span className="tracking-tight">InternIQ</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <a href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-              <a href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-              <p className="text-sm text-muted-foreground">© 2026 InternIQ</p>
-            </div>
+      <div className="iq-thick-rule"/>
+      <footer className="iq-footer">
+        <div className="iq-footer-inner">
+          <div className="iq-logo">Intern<span className="iq-logo-accent">IQ</span></div>
+          <p className="iq-footer-copy">© 2026 InternIQ. Built for ambitious applicants.</p>
+          <div className="iq-footer-links">
+            <a href="/privacy" className="iq-footer-link">Privacy</a>
+            <a href="/terms" className="iq-footer-link">Terms</a>
           </div>
         </div>
       </footer>
+      <div className="iq-top-rule"/>
     </div>
   );
 }
