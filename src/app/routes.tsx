@@ -3,6 +3,9 @@ import HomePage from "../components/HomePage";
 import OptimizePage from "../components/OptimizePage";
 import PrivacyPage from "../components/legal/PrivacyPage";
 import TermsPage from "../components/legal/TermsPage";
+import SignInPage from "../components/auth/SignInPage";
+import SignUpPage from "../components/auth/SignUpPage";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -10,8 +13,20 @@ export const router = createBrowserRouter([
     Component: HomePage,
   },
   {
+    path: "/sign-in",
+    Component: SignInPage,
+  },
+  {
+    path: "/sign-up",
+    Component: SignUpPage,
+  },
+  {
     path: "/optimize",
-    Component: OptimizePage,
+    element: (
+      <ProtectedRoute>
+        <OptimizePage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/privacy",

@@ -1,9 +1,12 @@
 import { ArrowRight, Target, Zap, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { isSignedIn, signOut } = useAuth();
+  const { user } = useUser();
 
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -12,6 +15,11 @@ export default function HomePage() {
       requestAnimationFrame(() => el.classList.add('iq-revealed'));
     });
   }, []);
+
+  const displayName =
+    user?.firstName ??
+    user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ??
+    null;
 
   return (
     <div className="iq-root">
@@ -27,7 +35,40 @@ export default function HomePage() {
           <div className="iq-nav-links">
             <a href="#features" className="iq-nav-link">Features</a>
             <a href="#how-it-works" className="iq-nav-link">Process</a>
-            <button onClick={() => navigate('/optimize')} className="iq-nav-cta">Analyse CV</button>
+
+            {isSignedIn ? (
+              <>
+                <button
+                  onClick={() => navigate('/optimize')}
+                  className="iq-nav-cta"
+                >
+                  Analyse CV
+                </button>
+                <button
+                  onClick={() => signOut()}
+                  className="iq-btn-ghost"
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', font: 'inherit' }}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/sign-in')}
+                  className="iq-btn-ghost"
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', font: 'inherit' }}
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => navigate('/sign-up')}
+                  className="iq-nav-cta"
+                >
+                  Join waitlist
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -46,11 +87,33 @@ export default function HomePage() {
               InternIQ tells you exactly why yours might be one of them — and precisely how to fix it.
             </p>
             <div className="iq-hero-actions">
-              <button onClick={() => navigate('/optimize')} className="iq-btn-primary">
-                Analyse my CV <ArrowRight size={14}/>
-              </button>
-              <a href="#how-it-works" className="iq-btn-ghost">How it works</a>
+              {isSignedIn ? (
+                <button onClick={() => navigate('/optimize')} className="iq-btn-primary">
+                  Analyse my CV <ArrowRight size={14}/>
+                </button>
+              ) : (
+                <>
+                  <button onClick={() => navigate('/sign-up')} className="iq-btn-primary">
+                    Join the waitlist <ArrowRight size={14}/>
+                  </button>
+                  <button onClick={() => navigate('/sign-in')} className="iq-btn-ghost"
+                    style={{ border: 'none', background: 'none', cursor: 'pointer', font: 'inherit' }}>
+                    Sign in
+                  </button>
+                </>
+              )}
             </div>
+            {isSignedIn && displayName && (
+              <p style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                color: 'var(--stone)',
+                marginTop: '12px',
+                letterSpacing: '0.06em',
+              }}>
+                Signed in as {displayName}
+              </p>
+            )}
           </div>
 
           <div className="iq-hero-right" data-reveal>
@@ -79,26 +142,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="iq-section-rule"/>
+      <div className="iq-thick-rule" />
 
       {/* Features */}
-      <section id="features" className="iq-features">
+      <section className="iq-features" id="features">
         <div className="iq-section-inner">
-          <div className="iq-section-header" data-reveal>
+          <div className="iq-section-header">
             <span className="iq-section-num">01</span>
-            <h2 className="iq-section-title">What InternIQ analyses</h2>
+            <span className="iq-section-title">What InternIQ analyses</span>
           </div>
           <div className="iq-features-grid">
             {[
-              { icon:<Target size={18}/>, title:'ATS Compatibility', body:'See the exact score recruiters\' software gives your CV before a human ever reads it.' },
-              { icon:<Zap size={18}/>, title:'Keyword Gap Analysis', body:'We cross-reference every keyword in the job description against your CV. Missing one critical term ends your application silently.' },
-              { icon:<CheckCircle2 size={18}/>, title:'Bullet Point Rewrites', body:'"Responsible for tasks" gets you binned. We rewrite your weakest bullets with action verbs and quantified impact.' },
-              { icon:<Target size={18}/>, title:'Section-by-Section Grades', body:'Education, experience, skills — every section scored individually so you know exactly where you\'re losing points.' },
-            ].map((f,i)=>(
-              <div key={i} className="iq-feature-card" data-reveal>
-                <div className="iq-feature-icon">{f.icon}</div>
-                <h3 className="iq-feature-title">{f.title}</h3>
-                <p className="iq-feature-body">{f.body}</p>
+              { Icon: Target, title: 'ATS Score', body: 'Scored 0–100 with a letter grade. Understand exactly where your CV stands against the algorithm before a human ever sees it.' },
+              { Icon: Zap, title: 'Keyword Gaps', body: 'See which keywords from the job description are missing, matched, or recommended. Fix the gaps that cost you interviews.' },
+              { Icon: CheckCircle2, title: 'Bullet Rewrites', body: 'Your weakest bullet points rewritten with stronger verbs and quantified outcomes. Copy, paste, done.' },
+              { Icon: Target, title: 'Section Scores', body: 'Every section of your CV scored and reviewed individually — Education, Experience, Skills, and more.' },
+            ].map(({ Icon, title, body }, i) => (
+              <div key={i} className="iq-feature-card">
+                <div className="iq-feature-icon"><Icon size={20}/></div>
+                <div className="iq-feature-title">{title}</div>
+                <div className="iq-feature-body">{body}</div>
               </div>
             ))}
           </div>
@@ -108,23 +171,23 @@ export default function HomePage() {
       <div className="iq-section-rule"/>
 
       {/* Process */}
-      <section id="how-it-works" className="iq-process">
+      <section className="iq-process" id="how-it-works">
         <div className="iq-section-inner">
-          <div className="iq-section-header" data-reveal>
+          <div className="iq-section-header">
             <span className="iq-section-num">02</span>
-            <h2 className="iq-section-title">The process</h2>
+            <span className="iq-section-title">How it works</span>
           </div>
           <div className="iq-steps">
             {[
-              { n:'I',   title:'Upload your CV',           body:'Drop in your PDF. Processed in memory, never stored on our servers. Deleted immediately after analysis.' },
-              { n:'II',  title:'Paste the job description', body:'Copy in the listing. Our AI reads it exactly the way the ATS does — role, requirements, keywords.' },
-              { n:'III', title:'Receive your report',       body:'ATS score, gap analysis, rewritten bullets, and a ranked list of the three highest-impact fixes.' },
-            ].map((s,i)=>(
-              <div key={i} className="iq-step" data-reveal>
-                <div className="iq-step-num">{s.n}</div>
+              { title: 'Upload your CV', body: 'Drag and drop your CV as a PDF. It is processed entirely in memory — never stored, never logged.' },
+              { title: 'Paste the job description', body: 'Copy the full job listing from LinkedIn, Gradcracker, or wherever. The more detail, the better the analysis.' },
+              { title: 'Get your analysis', body: 'In under 30 seconds, you get an ATS score, keyword gaps, bullet rewrites, and three priority fixes. Specific, actionable, honest.' },
+            ].map(({ title, body }, i) => (
+              <div key={i} className="iq-step">
+                <div className="iq-step-num">0{i+1}</div>
                 <div className="iq-step-content">
-                  <h3 className="iq-step-title">{s.title}</h3>
-                  <p className="iq-step-body">{s.body}</p>
+                  <div className="iq-step-title">{title}</div>
+                  <div className="iq-step-body">{body}</div>
                 </div>
               </div>
             ))}
@@ -132,31 +195,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="iq-section-rule"/>
-
       {/* Stats bar */}
-      <section className="iq-stats-bar" data-reveal>
+      <div className="iq-stats-bar">
         <div className="iq-stats-bar-inner">
-          {[['94%','ATS pass rate'],['3.2×','More interviews'],['< 30s','Analysis time'],['Free','During beta']].map(([n,l],i)=>(
+          {[['30s','Average analysis time'],['5MB','Max CV size'],['100%','Privacy guaranteed'],['0','CVs stored']].map(([n,l],i)=>(
             <div key={i} className="iq-stats-bar-item">
               <span className="iq-stats-bar-n">{n}</span>
               <span className="iq-stats-bar-l">{l}</span>
             </div>
           ))}
         </div>
-      </section>
-
-      <div className="iq-section-rule"/>
+      </div>
 
       {/* CTA */}
-      <section className="iq-cta-section" data-reveal>
+      <section className="iq-cta-section">
         <div className="iq-cta-inner">
-          <div className="iq-kicker"><span className="iq-kicker-line"/>Start now — free</div>
-          <h2 className="iq-cta-headline">Stop guessing.<br/>Start getting <em>interviews.</em></h2>
-          <p className="iq-cta-sub">Upload your CV and any job description. Your full analysis is ready in under 30 seconds.</p>
-          <button onClick={() => navigate('/optimize')} className="iq-btn-primary iq-btn-large">
-            Analyse my CV now <ArrowRight size={16}/>
-          </button>
+          <div className="iq-kicker"><span className="iq-kicker-line"/>Get started</div>
+          <h2 className="iq-cta-headline">
+            Stop guessing.<br/><em>Start getting</em><br/>interviews.
+          </h2>
+          <p className="iq-cta-sub">
+            InternIQ is in closed beta. Join the waitlist and we will email
+            you when your access is confirmed.
+          </p>
+          {isSignedIn ? (
+            <button onClick={() => navigate('/optimize')} className="iq-btn-primary iq-btn-large">
+              Analyse my CV <ArrowRight size={14}/>
+            </button>
+          ) : (
+            <button onClick={() => navigate('/sign-up')} className="iq-btn-primary iq-btn-large">
+              Join the waitlist <ArrowRight size={14}/>
+            </button>
+          )}
         </div>
       </section>
 
@@ -165,7 +235,7 @@ export default function HomePage() {
       <footer className="iq-footer">
         <div className="iq-footer-inner">
           <div className="iq-logo">Intern<span className="iq-logo-accent">IQ</span></div>
-          <p className="iq-footer-copy">© 2026 InternIQ. Built for ambitious applicants.</p>
+          <p className="iq-footer-copy">© 2026 InternIQ</p>
           <div className="iq-footer-links">
             <a href="/privacy" className="iq-footer-link">Privacy</a>
             <a href="/terms" className="iq-footer-link">Terms</a>
