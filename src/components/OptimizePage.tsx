@@ -12,7 +12,6 @@ export default function OptimizePage() {
   const navigate = useNavigate();
   const { getToken, signOut } = useAuth();
   const { user } = useUser();
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -64,7 +63,6 @@ export default function OptimizePage() {
     setAppState("analyzing");
     setErrorMessage("");
     try {
-      // Pass getToken so analyzeCV can attach the Bearer token
       const response = await analyzeCV(uploadedFile, jobDescription, getToken);
       if (response.success && response.result) {
         setResult(response.result);
@@ -86,14 +84,13 @@ export default function OptimizePage() {
   const isRateLimited = errorMessage.toLowerCase().includes("too many requests");
   const canAnalyze = !!uploadedFile && jobDescription.trim().length > 20;
 
-  // Display name: first name if available, else email prefix
   const displayName =
     user?.firstName ??
     user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ??
     "there";
 
   return (
-    <div className="iq-root" style={{ backgroundImage: "none", background: "var(--paper)" }}>
+    <div className="iq-root" style={{ backgroundImage: "none", background: "var(--bg)" }}>
       <div className="iq-top-rule" />
 
       {/* Nav */}
@@ -108,32 +105,24 @@ export default function OptimizePage() {
               <button
                 onClick={() => { setResult(null); setAppState("idle"); setErrorMessage(""); }}
                 className="iq-btn-ghost"
-                style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", padding: 0, background: "none", cursor: "pointer", font: "inherit" }}
               >
-                <RotateCcw size={12} /> Analyse again
+                <RotateCcw size={13} /> Analyse again
               </button>
             )}
-            <button
-              onClick={() => navigate("/")}
-              className="iq-btn-ghost"
-              style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", padding: 0, background: "none", cursor: "pointer", font: "inherit" }}
-            >
-              <ArrowLeft size={12} /> Home
+            <button onClick={() => navigate("/")} className="iq-btn-ghost">
+              <ArrowLeft size={13} /> Home
             </button>
-
-            {/* User identity + sign out */}
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              paddingLeft: "12px",
-              borderLeft: "1px solid var(--rule)",
+              gap: "8px",
+              paddingLeft: "8px",
+              borderLeft: "1px solid var(--border)",
             }}>
               <span style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "10px",
-                color: "var(--stone)",
-                letterSpacing: "0.06em",
+                fontSize: "11px",
+                color: "var(--ink-4)",
               }}>
                 {displayName}
               </span>
@@ -144,14 +133,21 @@ export default function OptimizePage() {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "var(--stone)",
+                  color: "var(--ink-4)",
                   display: "flex",
                   alignItems: "center",
-                  padding: 0,
-                  transition: "color 0.2s",
+                  padding: "4px",
+                  borderRadius: "var(--radius-sm)",
+                  transition: "color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease)",
                 }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--copper)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--stone)")}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = "var(--ink)";
+                  e.currentTarget.style.background = "var(--border)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "var(--ink-4)";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
                 <LogOut size={13} />
               </button>
@@ -159,16 +155,19 @@ export default function OptimizePage() {
           </div>
         </div>
       </nav>
-      <div className="iq-thick-rule" />
 
       {/* Page header */}
       <div className="iq-opt-header">
-        <div className="iq-kicker"><span className="iq-kicker-line" />Upload · Analyse · Improve</div>
+        <div className="iq-kicker">
+          <span className="iq-kicker-line" />Upload · Analyse · Improve
+        </div>
         <h1 className="iq-opt-title">Optimise your CV</h1>
-        <p className="iq-opt-sub">Upload your CV and paste the job description. Your full analysis is ready in under 30 seconds.</p>
+        <p className="iq-opt-sub">
+          Upload your CV and paste the job description. Your full analysis is ready in under 30 seconds.
+        </p>
       </div>
 
-      <div className="iq-section-rule" style={{ margin: "0 var(--pad) 0" }} />
+      <div className="iq-section-rule" style={{ margin: "0 var(--pad)" }} />
 
       {/* Main layout */}
       <div className="iq-opt-layout">
@@ -176,7 +175,7 @@ export default function OptimizePage() {
         {/* Left — inputs */}
         <div className="iq-opt-left">
 
-          {/* Upload */}
+          {/* Upload panel */}
           <div className="iq-opt-panel">
             <div className="iq-opt-panel-header">
               <span className="iq-opt-panel-num">01</span>
@@ -187,7 +186,7 @@ export default function OptimizePage() {
               type="file"
               accept="application/pdf"
               onChange={handleFileUpload}
-              className="hidden"
+              style={{ display: "none" }}
             />
 
             {!uploadedFile ? (
@@ -197,13 +196,38 @@ export default function OptimizePage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="iq-upload-zone"
               >
-                <Upload size={24} style={{ color: "var(--stone)", marginBottom: "10px" }} />
+                <div style={{
+                  width: "40px",
+                  height: "40px",
+                  background: "var(--bg-sunken)",
+                  borderRadius: "var(--radius)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "12px",
+                  color: "var(--ink-3)",
+                }}>
+                  <Upload size={20} />
+                </div>
                 <p className="iq-upload-main">Click or drag to upload</p>
                 <p className="iq-upload-sub">PDF only · Max 5MB</p>
               </div>
             ) : (
               <div className="iq-file-row">
-                <FileText size={20} style={{ color: "var(--copper)", flexShrink: 0 }} />
+                <div style={{
+                  width: "36px",
+                  height: "36px",
+                  background: "var(--accent-tint)",
+                  border: "1px solid rgba(163,230,53,0.3)",
+                  borderRadius: "var(--radius-sm)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  color: "#4a7c00",
+                }}>
+                  <FileText size={16} />
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p className="iq-file-name">{uploadedFile.name}</p>
                   <p className="iq-file-size">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
@@ -213,19 +237,19 @@ export default function OptimizePage() {
             )}
 
             <div className="iq-privacy-note">
-              <ShieldCheck size={13} style={{ flexShrink: 0, color: "var(--stone)" }} />
+              <ShieldCheck size={12} style={{ flexShrink: 0, marginTop: "1px", color: "var(--ink-4)" }} />
               <span>
                 Your CV is processed in memory and{" "}
-                <strong style={{ color: "var(--ink)" }}>never stored</strong>.
+                <strong style={{ color: "var(--ink-2)", fontWeight: 600 }}>never stored</strong>.
                 Deleted immediately after analysis.{" "}
-                <a href="/privacy" style={{ color: "var(--copper)", textDecoration: "underline" }}>
+                <a href="/privacy" style={{ color: "var(--accent-dim)", textDecoration: "underline" }}>
                   Privacy policy
                 </a>
               </span>
             </div>
           </div>
 
-          {/* Job description */}
+          {/* Job description panel */}
           <div className="iq-opt-panel">
             <div className="iq-opt-panel-header">
               <span className="iq-opt-panel-num">02</span>
@@ -240,7 +264,7 @@ export default function OptimizePage() {
             <div className="iq-char-count">
               {jobDescription.length} characters
               {jobDescription.length < 20 && jobDescription.length > 0 && (
-                <span style={{ color: "var(--copper)", marginLeft: "8px" }}>
+                <span style={{ color: "var(--accent-dim)", marginLeft: "8px" }}>
                   — add more detail for better results
                 </span>
               )}
@@ -273,10 +297,9 @@ export default function OptimizePage() {
           {!uploadedFile && !jobDescription && (
             <p style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "10px",
-              color: "var(--stone)",
+              fontSize: "11px",
+              color: "var(--ink-4)",
               textAlign: "center",
-              letterSpacing: "0.06em",
             }}>
               Upload your CV and paste a job description to begin
             </p>
@@ -289,25 +312,49 @@ export default function OptimizePage() {
             <AnalysisResults result={result} />
           ) : appState === "analyzing" ? (
             <div className="iq-opt-panel iq-analyzing-state">
-              <Loader2 size={28} className="iq-spin" style={{ color: "var(--copper)" }} />
+              <div style={{
+                width: "48px",
+                height: "48px",
+                background: "var(--accent-tint)",
+                border: "1px solid rgba(163,230,53,0.3)",
+                borderRadius: "var(--radius)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#4a7c00",
+              }}>
+                <Loader2 size={22} className="iq-spin" />
+              </div>
               <p className="iq-analyzing-title">Analysing your CV</p>
               <p className="iq-analyzing-sub">Checking ATS score, keywords, bullet strength...</p>
             </div>
           ) : pdfDataUrl ? (
             <div className="iq-opt-panel" style={{ padding: 0, overflow: "hidden", height: "calc(100vh - 280px)", minHeight: "400px" }}>
-              <div className="iq-opt-panel-header" style={{ padding: "14px 20px" }}>
+              <div className="iq-opt-panel-header">
                 <span className="iq-opt-panel-num">03</span>
                 <span className="iq-opt-panel-title">CV Preview</span>
               </div>
               <iframe
                 src={pdfDataUrl}
-                style={{ width: "100%", height: "calc(100% - 48px)", border: "none" }}
+                style={{ width: "100%", height: "calc(100% - 49px)", border: "none" }}
                 title="CV Preview"
               />
             </div>
           ) : (
             <div className="iq-opt-panel iq-empty-preview">
-              <FileText size={32} style={{ color: "var(--ink-faint)", marginBottom: "12px" }} />
+              <div style={{
+                width: "48px",
+                height: "48px",
+                background: "var(--bg-sunken)",
+                borderRadius: "var(--radius)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--ink-4)",
+                marginBottom: "16px",
+              }}>
+                <FileText size={22} />
+              </div>
               <p className="iq-empty-title">CV preview</p>
               <p className="iq-empty-sub">
                 Your CV will appear here after upload. Results will show here after analysis.
@@ -318,10 +365,11 @@ export default function OptimizePage() {
       </div>
 
       {/* Footer */}
-      <div className="iq-thick-rule" style={{ marginTop: "64px" }} />
       <footer className="iq-footer">
         <div className="iq-footer-inner">
-          <div className="iq-logo">Intern<span className="iq-logo-accent">IQ</span></div>
+          <div className="iq-logo" style={{ cursor: "default", fontSize: "16px" }}>
+            Intern<span className="iq-logo-accent">IQ</span>
+          </div>
           <p className="iq-footer-copy">© 2026 InternIQ</p>
           <div className="iq-footer-links">
             <a href="/privacy" className="iq-footer-link">Privacy</a>
@@ -329,7 +377,6 @@ export default function OptimizePage() {
           </div>
         </div>
       </footer>
-      <div className="iq-top-rule" />
     </div>
   );
 }

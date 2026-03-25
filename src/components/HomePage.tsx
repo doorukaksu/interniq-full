@@ -1,4 +1,4 @@
-import { ArrowRight, Target, Zap, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Target, Zap, CheckCircle2, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
@@ -11,8 +11,10 @@ export default function HomePage() {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
     els.forEach((el, i) => {
-      el.style.setProperty('--reveal-delay', `${i * 90}ms`);
-      requestAnimationFrame(() => el.classList.add('iq-revealed'));
+      el.style.setProperty('--reveal-delay', `${i * 100}ms`);
+      requestAnimationFrame(() => {
+        setTimeout(() => el.classList.add('iq-revealed'), 10);
+      });
     });
   }, []);
 
@@ -28,26 +30,22 @@ export default function HomePage() {
       {/* Nav */}
       <nav className="iq-nav">
         <div className="iq-nav-inner">
-          <div className="iq-logo" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
+          <div className="iq-logo" onClick={() => navigate('/')}>
             Intern<span className="iq-logo-accent">IQ</span>
           </div>
-          <span className="iq-nav-edition">Beta Edition · 2026</span>
+          <span className="iq-nav-edition">Beta · 2026</span>
           <div className="iq-nav-links">
             <a href="#features" className="iq-nav-link">Features</a>
-            <a href="#how-it-works" className="iq-nav-link">Process</a>
-
+            <a href="#how-it-works" className="iq-nav-link">How it works</a>
             {isSignedIn ? (
               <>
-                <button
-                  onClick={() => navigate('/optimize')}
-                  className="iq-nav-cta"
-                >
+                <button onClick={() => navigate('/optimize')} className="iq-nav-cta">
                   Analyse CV
                 </button>
                 <button
                   onClick={() => signOut()}
                   className="iq-btn-ghost"
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', font: 'inherit' }}
+                  style={{ padding: '6px 12px', fontSize: '13px' }}
                 >
                   Sign out
                 </button>
@@ -57,14 +55,11 @@ export default function HomePage() {
                 <button
                   onClick={() => navigate('/sign-in')}
                   className="iq-btn-ghost"
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', font: 'inherit' }}
+                  style={{ padding: '6px 12px', fontSize: '13px' }}
                 >
                   Sign in
                 </button>
-                <button
-                  onClick={() => navigate('/sign-up')}
-                  className="iq-nav-cta"
-                >
+                <button onClick={() => navigate('/sign-up')} className="iq-nav-cta">
                   Join waitlist
                 </button>
               </>
@@ -72,32 +67,33 @@ export default function HomePage() {
           </div>
         </div>
       </nav>
-      <div className="iq-thick-rule" />
 
       {/* Hero */}
       <section className="iq-hero">
         <div className="iq-hero-inner">
           <div className="iq-hero-left" data-reveal>
-            <div className="iq-kicker"><span className="iq-kicker-line"/>AI · CV Intelligence · Free Beta</div>
+            <div className="iq-kicker">
+              <span className="iq-kicker-line" />
+              AI-powered · UK internship market · Beta
+            </div>
             <h1 className="iq-headline">
-              Your CV is<br/>getting rejected<br/>before a human<br/><em>reads it.</em>
+              Your CV is failing<br />before anyone<br /><em>reads it.</em>
             </h1>
             <p className="iq-deck">
-              ATS systems filter out 75% of applications automatically.
-              InternIQ tells you exactly why yours might be one of them — and precisely how to fix it.
+              ATS systems reject 75% of applications automatically.
+              InternIQ tells you exactly why yours is one of them — and how to fix it in minutes.
             </p>
             <div className="iq-hero-actions">
               {isSignedIn ? (
-                <button onClick={() => navigate('/optimize')} className="iq-btn-primary">
-                  Analyse my CV <ArrowRight size={14}/>
+                <button onClick={() => navigate('/optimize')} className="iq-btn-primary iq-btn-large">
+                  Analyse my CV <ArrowRight size={16} />
                 </button>
               ) : (
                 <>
-                  <button onClick={() => navigate('/sign-up')} className="iq-btn-primary">
-                    Join the waitlist <ArrowRight size={14}/>
+                  <button onClick={() => navigate('/sign-up')} className="iq-btn-primary iq-btn-large">
+                    Join the waitlist <ArrowRight size={16} />
                   </button>
-                  <button onClick={() => navigate('/sign-in')} className="iq-btn-ghost"
-                    style={{ border: 'none', background: 'none', cursor: 'pointer', font: 'inherit' }}>
+                  <button onClick={() => navigate('/sign-in')} className="iq-btn-ghost">
                     Sign in
                   </button>
                 </>
@@ -106,37 +102,54 @@ export default function HomePage() {
             {isSignedIn && displayName && (
               <p style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                color: 'var(--stone)',
-                marginTop: '12px',
-                letterSpacing: '0.06em',
+                fontSize: '11px',
+                color: 'var(--ink-4)',
+                marginTop: '16px',
               }}>
                 Signed in as {displayName}
               </p>
             )}
           </div>
 
+          {/* Hero right — product preview */}
           <div className="iq-hero-right" data-reveal>
+            <div className="iq-score-card">
+              <div className="iq-score-card-label">ATS Analysis — Example output</div>
+              <div className="iq-score-card-row">
+                <div className="iq-score-big">78</div>
+                <div className="iq-score-grade">B+</div>
+              </div>
+              <div className="iq-score-bar-wrap">
+                <div className="iq-score-bar-fill" />
+              </div>
+              <p style={{
+                fontFamily: 'var(--font)',
+                fontSize: '12px',
+                color: 'var(--ink-3)',
+                marginTop: '10px',
+                lineHeight: 1.55,
+              }}>
+                Strong keyword alignment. Missing 4 critical terms from the job description.
+              </p>
+              <div className="iq-chip-row" style={{ marginTop: '14px' }}>
+                {['Python', 'Data Analysis', 'Excel'].map(k => (
+                  <span key={k} className="iq-chip iq-chip-matched">{k}</span>
+                ))}
+                {['SQL', 'Stakeholder mgmt'].map(k => (
+                  <span key={k} className="iq-chip iq-chip-missing">{k}</span>
+                ))}
+              </div>
+            </div>
+
             <div className="iq-stat-block">
-              <div className="iq-stat-block-label">Verified outcomes</div>
               <div className="iq-stat-row">
-                {[['94%','ATS pass rate'],['3.2×','More interviews'],['2,841','On waitlist']].map(([n,l],i)=>(
+                {[['94%', 'ATS pass rate'], ['3.2×', 'More interviews'], ['2,841', 'On waitlist']].map(([n, l], i) => (
                   <div key={i} className="iq-stat">
                     <span className="iq-stat-n">{n}</span>
                     <span className="iq-stat-l">{l}</span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="iq-pull-quote">
-              <span className="iq-pq-open">"</span>
-              Most CVs get rejected in 6 seconds. Find out why yours might be one of them.
-              <span className="iq-pq-close">"</span>
-            </div>
-            <div className="iq-tag-cloud">
-              {['ATS Score','Keyword Gaps','Bullet Rewrites','Section Grades','Priority Fixes'].map(t=>(
-                <span key={t} className="iq-tag">{t}</span>
-              ))}
             </div>
           </div>
         </div>
@@ -155,11 +168,16 @@ export default function HomePage() {
             {[
               { Icon: Target, title: 'ATS Score', body: 'Scored 0–100 with a letter grade. Understand exactly where your CV stands against the algorithm before a human ever sees it.' },
               { Icon: Zap, title: 'Keyword Gaps', body: 'See which keywords from the job description are missing, matched, or recommended. Fix the gaps that cost you interviews.' },
-              { Icon: CheckCircle2, title: 'Bullet Rewrites', body: 'Your weakest bullet points rewritten with stronger verbs and quantified outcomes. Copy, paste, done.' },
-              { Icon: Target, title: 'Section Scores', body: 'Every section of your CV scored and reviewed individually — Education, Experience, Skills, and more.' },
+              { Icon: CheckCircle2, title: 'Bullet Rewrites', body: 'Your weakest bullet points rewritten with stronger verbs and quantified outcomes — copy, paste, done.' },
+              { Icon: TrendingUp, title: 'Section Scores', body: 'Every section scored individually with specific, actionable feedback. Education, Experience, Skills — all covered.' },
             ].map(({ Icon, title, body }, i) => (
-              <div key={i} className="iq-feature-card">
-                <div className="iq-feature-icon"><Icon size={20}/></div>
+              <div
+                key={i}
+                className="iq-feature-card"
+                data-reveal
+                style={{ '--reveal-delay': `${i * 80}ms` } as React.CSSProperties}
+              >
+                <div className="iq-feature-icon"><Icon size={18} /></div>
                 <div className="iq-feature-title">{title}</div>
                 <div className="iq-feature-body">{body}</div>
               </div>
@@ -168,7 +186,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="iq-section-rule"/>
+      <div className="iq-thick-rule" />
 
       {/* Process */}
       <section className="iq-process" id="how-it-works">
@@ -179,12 +197,17 @@ export default function HomePage() {
           </div>
           <div className="iq-steps">
             {[
-              { title: 'Upload your CV', body: 'Drag and drop your CV as a PDF. It is processed entirely in memory — never stored, never logged.' },
-              { title: 'Paste the job description', body: 'Copy the full job listing from LinkedIn, Gradcracker, or wherever. The more detail, the better the analysis.' },
-              { title: 'Get your analysis', body: 'In under 30 seconds, you get an ATS score, keyword gaps, bullet rewrites, and three priority fixes. Specific, actionable, honest.' },
+              { title: 'Upload your CV', body: 'Drag and drop your CV as a PDF. Processed entirely in memory — never stored, never logged. Deleted the moment your analysis is complete.' },
+              { title: 'Paste the job description', body: 'Copy the full job listing from LinkedIn, Gradcracker, or wherever you found it. The more detail, the sharper the analysis.' },
+              { title: 'Get your full report', body: 'In under 30 seconds: ATS score, keyword gaps, bullet rewrites, section scores, and three priority fixes. Specific, actionable, honest.' },
             ].map(({ title, body }, i) => (
-              <div key={i} className="iq-step">
-                <div className="iq-step-num">0{i+1}</div>
+              <div
+                key={i}
+                className="iq-step"
+                data-reveal
+                style={{ '--reveal-delay': `${i * 100}ms` } as React.CSSProperties}
+              >
+                <div className="iq-step-num">0{i + 1}</div>
                 <div className="iq-step-content">
                   <div className="iq-step-title">{title}</div>
                   <div className="iq-step-body">{body}</div>
@@ -198,7 +221,7 @@ export default function HomePage() {
       {/* Stats bar */}
       <div className="iq-stats-bar">
         <div className="iq-stats-bar-inner">
-          {[['30s','Average analysis time'],['5MB','Max CV size'],['100%','Privacy guaranteed'],['0','CVs stored']].map(([n,l],i)=>(
+          {[['30s', 'Average analysis'], ['5MB', 'Max CV size'], ['100%', 'Privacy guaranteed'], ['0', 'CVs stored']].map(([n, l], i) => (
             <div key={i} className="iq-stats-bar-item">
               <span className="iq-stats-bar-n">{n}</span>
               <span className="iq-stats-bar-l">{l}</span>
@@ -209,10 +232,13 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="iq-cta-section">
-        <div className="iq-cta-inner">
-          <div className="iq-kicker"><span className="iq-kicker-line"/>Get started</div>
+        <div className="iq-cta-inner" data-reveal>
+          <div className="iq-kicker" style={{ justifyContent: 'center' }}>
+            <span className="iq-kicker-line" />
+            Closed beta · Rolling access
+          </div>
           <h2 className="iq-cta-headline">
-            Stop guessing.<br/><em>Start getting</em><br/>interviews.
+            Stop guessing.<br />Start getting <em>interviews.</em>
           </h2>
           <p className="iq-cta-sub">
             InternIQ is in closed beta. Join the waitlist and we will email
@@ -220,21 +246,22 @@ export default function HomePage() {
           </p>
           {isSignedIn ? (
             <button onClick={() => navigate('/optimize')} className="iq-btn-primary iq-btn-large">
-              Analyse my CV <ArrowRight size={14}/>
+              Analyse my CV <ArrowRight size={16} />
             </button>
           ) : (
             <button onClick={() => navigate('/sign-up')} className="iq-btn-primary iq-btn-large">
-              Join the waitlist <ArrowRight size={14}/>
+              Join the waitlist <ArrowRight size={16} />
             </button>
           )}
         </div>
       </section>
 
       {/* Footer */}
-      <div className="iq-thick-rule"/>
       <footer className="iq-footer">
         <div className="iq-footer-inner">
-          <div className="iq-logo">Intern<span className="iq-logo-accent">IQ</span></div>
+          <div className="iq-logo" style={{ cursor: 'default', fontSize: '16px' }}>
+            Intern<span className="iq-logo-accent">IQ</span>
+          </div>
           <p className="iq-footer-copy">© 2026 InternIQ</p>
           <div className="iq-footer-links">
             <a href="/privacy" className="iq-footer-link">Privacy</a>
@@ -242,7 +269,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-      <div className="iq-top-rule"/>
     </div>
   );
 }

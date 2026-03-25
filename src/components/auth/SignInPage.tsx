@@ -1,199 +1,141 @@
-import { SignIn } from "@clerk/clerk-react";
-import { useNavigate, useLocation } from "react-router";
+import { SignUp } from "@clerk/clerk-react";
+import { useNavigate } from "react-router";
 
-/**
- * Sign-in page using Clerk's hosted UI component, themed to match
- * InternIQ's broadsheet editorial design system via Clerk's appearance API.
- *
- * After sign-in, Clerk redirects to the returnTo path saved in location
- * state (set by ProtectedRoute), or falls back to /optimize.
- */
-export default function SignInPage() {
+export default function SignUpPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const returnTo = (location.state as { returnTo?: string })?.returnTo ?? "/optimize";
 
   return (
-    <div className="iq-root" style={{ backgroundImage: "none", background: "var(--paper)" }}>
+    <div className="iq-root" style={{ backgroundImage: "none" }}>
       <div className="iq-top-rule" />
 
-      {/* Nav */}
       <nav className="iq-nav">
         <div className="iq-nav-inner">
-          <div
-            className="iq-logo"
-            onClick={() => navigate("/")}
-            style={{ cursor: "pointer" }}
-          >
+          <div className="iq-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
             Intern<span className="iq-logo-accent">IQ</span>
           </div>
-          <span className="iq-nav-edition">Beta Access</span>
+          <span className="iq-nav-edition">Join the Beta</span>
           <div className="iq-nav-links">
-            <button
-              onClick={() => navigate("/")}
-              className="iq-btn-ghost"
-              style={{ border: "none", background: "none", cursor: "pointer", font: "inherit" }}
-            >
+            <button onClick={() => navigate("/")} className="iq-btn-ghost">
               ← Home
             </button>
           </div>
         </div>
       </nav>
-      <div className="iq-thick-rule" />
 
-      {/* Auth layout */}
       <div style={{
         maxWidth: "var(--max-w)",
         margin: "0 auto",
-        padding: "64px var(--pad)",
+        padding: "72px var(--pad)",
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
-        gap: "64px",
-        alignItems: "start",
+        gap: "72px",
+        alignItems: "center",
       }}>
-
-        {/* Left — editorial copy */}
-        <div style={{ paddingTop: "8px" }}>
+        {/* Left */}
+        <div>
           <div className="iq-kicker">
             <span className="iq-kicker-line" />
-            Beta Access · Invite Only
+            Closed Beta · Request Access
           </div>
           <h1 style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(36px, 4vw, 56px)",
+            fontFamily: "var(--font)",
+            fontSize: "clamp(36px, 4vw, 52px)",
             fontWeight: 700,
-            lineHeight: 0.95,
-            letterSpacing: "-1px",
+            lineHeight: 1.0,
+            letterSpacing: "-2px",
             color: "var(--ink)",
             marginBottom: "20px",
           }}>
-            Sign in to<br /><em style={{ fontStyle: "italic", fontWeight: 400, color: "var(--copper)" }}>InternIQ</em>
+            Join the<br />waitlist.
           </h1>
+
+          {/* Legal-safe disclaimer */}
+          <div style={{
+            border: "1px solid rgba(163,230,53,0.35)",
+            borderLeft: "3px solid var(--accent)",
+            padding: "14px 16px",
+            marginBottom: "24px",
+            background: "var(--accent-tint)",
+            borderRadius: "0 var(--radius-sm) var(--radius-sm) 0",
+          }}>
+            <p style={{
+              fontFamily: "var(--font)",
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "#4a7c00",
+              marginBottom: "4px",
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}>
+              Beta access — invite only
+            </p>
+            <p style={{
+              fontFamily: "var(--font)",
+              fontSize: "13px",
+              color: "var(--ink-3)",
+              lineHeight: 1.55,
+            }}>
+              Creating an account registers your interest. Access is rolled out
+              in batches — you will be emailed when your spot is confirmed.
+              Access is not guaranteed at time of registration.
+            </p>
+          </div>
+
           <p style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            fontWeight: 300,
-            color: "var(--ink-mid)",
-            lineHeight: 1.75,
-            maxWidth: "340px",
+            fontFamily: "var(--font)",
+            fontSize: "15px",
+            color: "var(--ink-3)",
+            lineHeight: 1.65,
+            maxWidth: "360px",
             marginBottom: "32px",
           }}>
-            InternIQ is currently in closed beta. Sign in if you have been
-            granted access, or join the waitlist on the home page.
+            AI analysis of your CV against any job description — ATS score,
+            keyword gaps, bullet rewrites, and priority fixes in under 30 seconds.
           </p>
 
-          {/* Trust signals */}
-          <div style={{
-            borderTop: "1px solid var(--rule)",
-            paddingTop: "24px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-          }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {[
-              "Your CV is never stored — processed in memory only",
+              "CV is never stored — processed in memory only",
               "UK GDPR compliant · No data sold to third parties",
-              "Secured by Clerk — enterprise-grade authentication",
-            ].map((line) => (
+              "Secured by Clerk — enterprise-grade auth",
+            ].map(line => (
               <div key={line} style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "10px",
-                color: "var(--stone)",
-                letterSpacing: "0.04em",
                 display: "flex",
-                alignItems: "flex-start",
-                gap: "8px",
+                alignItems: "center",
+                gap: "10px",
+                fontFamily: "var(--font)",
+                fontSize: "13px",
+                color: "var(--ink-3)",
               }}>
-                <span style={{ color: "var(--copper)", flexShrink: 0 }}>—</span>
+                <span style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: "var(--accent)",
+                  flexShrink: 0,
+                }} />
                 {line}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right — Clerk component */}
+        {/* Right — Clerk */}
         <div>
-          <SignIn
+          <SignUp
             routing="hash"
-            afterSignInUrl={returnTo}
-            signUpUrl="/sign-up"
-            appearance={{
-              variables: {
-                colorPrimary: "#B8692A",
-                colorBackground: "#ffffff",
-                colorInputBackground: "#f5f0e6",
-                colorInputText: "#1C1208",
-                colorText: "#1C1208",
-                colorTextSecondary: "#7A6D5A",
-                colorDanger: "#c0392b",
-                borderRadius: "0px",
-                fontFamily: "'Geist Mono', 'Courier New', monospace",
-                fontSize: "13px",
-              },
-              elements: {
-                card: {
-                  boxShadow: "none",
-                  border: "1px solid rgba(28,18,8,0.15)",
-                  borderRadius: "0",
-                  background: "#ffffff",
-                },
-                headerTitle: {
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: "24px",
-                  fontWeight: "700",
-                  color: "#1C1208",
-                  letterSpacing: "-0.3px",
-                },
-                headerSubtitle: {
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: "11px",
-                  color: "#7A6D5A",
-                },
-                formButtonPrimary: {
-                  backgroundColor: "#1C1208",
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: "11px",
-                  fontWeight: "500",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  borderRadius: "0",
-                  "&:hover": { backgroundColor: "#B8692A" },
-                },
-                formFieldInput: {
-                  borderRadius: "0",
-                  border: "1px solid rgba(28,18,8,0.2)",
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: "12px",
-                  backgroundColor: "#f5f0e6",
-                },
-                footerActionLink: {
-                  color: "#B8692A",
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: "11px",
-                },
-                dividerLine: { backgroundColor: "rgba(28,18,8,0.12)" },
-                dividerText: {
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: "10px",
-                  color: "#8A7D68",
-                },
-                socialButtonsBlockButton: {
-                  borderRadius: "0",
-                  border: "1px solid rgba(28,18,8,0.15)",
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: "11px",
-                },
-              },
-            }}
+            afterSignUpUrl="/optimize"
+            signInUrl="/sign-in"
+            appearance={clerkAppearance}
           />
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="iq-thick-rule" style={{ marginTop: "64px" }} />
       <footer className="iq-footer">
         <div className="iq-footer-inner">
-          <div className="iq-logo">Intern<span className="iq-logo-accent">IQ</span></div>
+          <div className="iq-logo" style={{ cursor: "default", fontSize: "16px" }}>
+            Intern<span className="iq-logo-accent">IQ</span>
+          </div>
           <p className="iq-footer-copy">© 2026 InternIQ</p>
           <div className="iq-footer-links">
             <a href="/privacy" className="iq-footer-link">Privacy</a>
@@ -201,7 +143,75 @@ export default function SignInPage() {
           </div>
         </div>
       </footer>
-      <div className="iq-top-rule" />
     </div>
   );
 }
+
+const clerkAppearance = {
+  variables: {
+    colorPrimary: "#0A0A0B",
+    colorBackground: "#FFFFFF",
+    colorInputBackground: "#F4F4F5",
+    colorInputText: "#0A0A0B",
+    colorText: "#0A0A0B",
+    colorTextSecondary: "#6B6B6F",
+    colorDanger: "#dc2626",
+    borderRadius: "8px",
+    fontFamily: "'DM Sans', -apple-system, sans-serif",
+    fontSize: "14px",
+  },
+  elements: {
+    card: {
+      boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
+      border: "1px solid rgba(10,10,11,0.08)",
+      borderRadius: "16px",
+      background: "#FFFFFF",
+    },
+    headerTitle: {
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "20px",
+      fontWeight: "700",
+      color: "#0A0A0B",
+      letterSpacing: "-0.5px",
+    },
+    headerSubtitle: {
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "13px",
+      color: "#6B6B6F",
+    },
+    formButtonPrimary: {
+      backgroundColor: "#0A0A0B",
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "14px",
+      fontWeight: "600",
+      borderRadius: "8px",
+      letterSpacing: "-0.1px",
+    },
+    formFieldInput: {
+      borderRadius: "8px",
+      border: "1px solid rgba(10,10,11,0.14)",
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "14px",
+      backgroundColor: "#F4F4F5",
+    },
+    footerActionLink: {
+      color: "#4a7c00",
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "13px",
+      fontWeight: "500",
+    },
+    dividerLine: { backgroundColor: "rgba(10,10,11,0.08)" },
+    dividerText: {
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "12px",
+      color: "#A1A1A6",
+    },
+    socialButtonsBlockButton: {
+      borderRadius: "8px",
+      border: "1px solid rgba(10,10,11,0.12)",
+      fontFamily: "'DM Sans', sans-serif",
+      fontSize: "13px",
+      fontWeight: "500",
+    },
+  },
+};
