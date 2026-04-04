@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Upload, ArrowLeft, Loader2, RotateCcw, ShieldCheck, FileText, LogOut } from "lucide-react";
+import { Upload, ArrowLeft, Loader2, RotateCcw, ShieldCheck, FileText, LogOut, UserCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { analyzeCV } from "../lib/api";
@@ -140,14 +140,6 @@ export default function OptimizePage() {
           </div>
           <span className="iq-nav-edition">CV Analysis Tool</span>
           <div className="iq-nav-links">
-            {appState === "results" && (
-              <button
-                onClick={() => { setResult(null); setAppState("idle"); setErrorMessage(""); }}
-                className="iq-btn-ghost"
-              >
-                <RotateCcw size={13} /> Analyse again
-              </button>
-            )}
             <button onClick={() => navigate("/")} className="iq-btn-ghost">
               <ArrowLeft size={13} /> Home
             </button>
@@ -170,13 +162,35 @@ export default function OptimizePage() {
               paddingLeft: "8px",
               borderLeft: "1px solid var(--border)",
             }}>
-              <span style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "11px",
-                color: "var(--ink-4)",
-              }}>
+              <button
+                onClick={() => navigate("/account")}
+                title="Account"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--ink-4)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "11px",
+                  padding: "4px 6px",
+                  borderRadius: "var(--radius-sm)",
+                  transition: "color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease)",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = "var(--ink)";
+                  e.currentTarget.style.background = "var(--border)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "var(--ink-4)";
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <UserCircle size={13} />
                 {displayName}
-              </span>
+              </button>
               <button
                 onClick={handleSignOut}
                 title="Sign out"
@@ -207,6 +221,46 @@ export default function OptimizePage() {
         </div>
       </nav>
 
+      {/* Results — full page two-column layout */}
+      {appState === "results" && result ? (
+        <>
+          <div style={{ padding: "32px var(--pad) 20px", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+              <div>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--ink-4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                  Analysis complete
+                </p>
+                <h1 style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "var(--ink)", letterSpacing: "-0.02em", margin: 0 }}>
+                  {uploadedFile?.name ?? "Your CV"}
+                </h1>
+              </div>
+              <button
+                onClick={() => { setResult(null); setAppState("idle"); setErrorMessage(""); }}
+                className="iq-btn-ghost"
+                style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }}
+              >
+                <RotateCcw size={13} /> Analyse again
+              </button>
+            </div>
+          </div>
+          <div style={{
+            maxWidth: "var(--max-w)",
+            margin: "0 auto",
+            padding: "32px var(--pad) 64px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "32px",
+            alignItems: "start",
+          }}>
+            <AnalysisResults result={result} isPartial={isPartial} column="left" />
+            <AnalysisResults result={result} isPartial={isPartial} column="right" />
+          </div>
+        </>
+      ) : null}
+
+      {/* Input layout — hidden when results showing */}
+      {appState !== "results" && (
+      <>
       {/* Page header */}
       <div className="iq-opt-header">
         <div className="iq-kicker">
@@ -357,11 +411,9 @@ export default function OptimizePage() {
           )}
         </div>
 
-        {/* Right — preview / results */}
+        {/* Right — preview / analyzing state */}
         <div className="iq-opt-right">
-          {appState === "results" && result ? (
-            <AnalysisResults result={result} />
-          ) : appState === "analyzing" ? (
+          {appState === "analyzing" ? (
             <div className="iq-opt-panel iq-analyzing-state">
               <div style={{
                 width: "48px",
@@ -414,6 +466,8 @@ export default function OptimizePage() {
           )}
         </div>
       </div>
+      </>
+      )}
 
       {/* Footer */}
       <footer className="iq-footer">

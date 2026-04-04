@@ -6,35 +6,35 @@
    Motion: Smooth, intentional, 60fps
 ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
 /* ── Design tokens ──────────────────────────────────────────────────────── */
 :root {
-  /* Surfaces */
-  --bg:           #F4F4F5;
-  --bg-elevated:  #FFFFFF;
-  --bg-sunken:    #EBEBEC;
-  --bg-overlay:   rgba(244,244,245,0.88);
+  /* Surfaces — slate dark */
+  --bg:           #0E1117;
+  --bg-elevated:  #161B27;
+  --bg-sunken:    #0A0D14;
+  --bg-overlay:   rgba(14,17,23,0.90);
 
-  /* Text */
-  --ink:          #0A0A0B;
-  --ink-2:        #3A3A3C;
-  --ink-3:        #6B6B6F;
-  --ink-4:        #A1A1A6;
+  /* Text — warm off-white */
+  --ink:          #EAEAF0;
+  --ink-2:        #B4B4C8;
+  --ink-3:        #72728A;
+  --ink-4:        #46465C;
 
-  /* Accent — lime */
+  /* Accent — lime (unchanged) */
   --accent:       #A3E635;
-  --accent-dim:   #8BCF1E;
-  --accent-glow:  rgba(163,230,53,0.18);
-  --accent-tint:  rgba(163,230,53,0.08);
+  --accent-dim:   #7EC81A;
+  --accent-glow:  rgba(163,230,53,0.20);
+  --accent-tint:  rgba(163,230,53,0.10);
 
-  /* Borders */
-  --border:       rgba(10,10,11,0.08);
-  --border-mid:   rgba(10,10,11,0.14);
-  --border-heavy: rgba(10,10,11,0.22);
+  /* Borders — light on dark */
+  --border:       rgba(255,255,255,0.07);
+  --border-mid:   rgba(255,255,255,0.12);
+  --border-heavy: rgba(255,255,255,0.20);
 
   /* Typography */
-  --font:         'DM Sans', -apple-system, sans-serif;
+  --font:         'Nunito Sans', -apple-system, sans-serif;
   --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
 
   /* Spacing & layout */
@@ -45,11 +45,11 @@
   --radius-lg:    16px;
   --radius-xl:    24px;
 
-  /* Shadows */
-  --shadow-xs:    0 1px 2px rgba(0,0,0,0.04);
-  --shadow-sm:    0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:    0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg:    0 12px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+  /* Shadows — deeper on dark */
+  --shadow-xs:    0 1px 2px rgba(0,0,0,0.20);
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.20);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.40), 0 2px 4px rgba(0,0,0,0.20);
+  --shadow-lg:    0 12px 40px rgba(0,0,0,0.50), 0 4px 8px rgba(0,0,0,0.20);
 
   /* Motion */
   --ease:         cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -84,7 +84,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(10,10,11,0.055) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
   background-size: 28px 28px;
   pointer-events: none;
   z-index: 0;
@@ -675,7 +675,7 @@
    STATS BAR
 ══════════════════════════════════════════════════════════════════════════ */
 .iq-stats-bar {
-  background: var(--ink);
+  background: #0A0D14;
   padding: 48px var(--pad);
   position: relative;
   overflow: hidden;

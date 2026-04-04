@@ -40,15 +40,11 @@ export default function HomePage() {
             <a onClick={() => navigate('/pricing')} className="iq-nav-link" style={{ cursor: 'pointer' }}>Pricing</a>
             {isSignedIn ? (
               <>
+                <button onClick={() => navigate('/account')} className="iq-btn-ghost" style={{ padding: '6px 12px', fontSize: '13px' }}>
+                  Account
+                </button>
                 <button onClick={() => navigate('/optimize')} className="iq-nav-cta">
                   Analyse CV
-                </button>
-                <button
-                  onClick={() => signOut()}
-                  className="iq-btn-ghost"
-                  style={{ padding: '6px 12px', fontSize: '13px' }}
-                >
-                  Sign out
                 </button>
               </>
             ) : (

@@ -135,13 +135,17 @@ def handle_webhook_event(payload: bytes, sig_header: str) -> dict:
     except stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid webhook signature.")
 
-    event_type: str = event["type"]
-    data = event["data"]["object"]
+    # Parse the raw payload as a plain dict — the Stripe SDK objects don't
+    # support .get(), so we use the already-verified JSON directly.
+    import json
+    event_dict: dict = json.loads(payload)
+    event_type: str = event_dict["type"]
+    data: dict = event_dict["data"]["object"]
 
     if event_type == "checkout.session.completed":
         return _handle_checkout_completed(data)
 
-    if event_type == "customer.subscription.updated":
+    if event_type in ("customer.subscription.created", "customer.subscription.updated"):
         return _handle_subscription_updated(data)
 
     if event_type == "customer.subscription.deleted":
@@ -163,10 +167,10 @@ def _get_clerk_id_from_customer(customer_id: str) -> str | None:
         sb.table("users")
         .select("clerk_id")
         .eq("stripe_customer_id", customer_id)
-        .maybe_single()
         .execute()
     )
-    return result.data["clerk_id"] if result.data else None
+    rows = result.data or []
+    return rows[0]["clerk_id"] if rows else None
 
 
 def _handle_checkout_completed(session: dict) -> dict:

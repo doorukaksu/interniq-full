@@ -3,6 +3,9 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { Check, Loader2 } from "lucide-react";
 import { createCheckout } from "../lib/api";
+import { useUserStatus } from "../hooks/useUserStatus";
+
+const PLAN_ORDER: Record<string, number> = { free: 0, pro: 1, unlimited: 2 };
 
 const PRICES = {
   PRO_MONTHLY: import.meta.env.VITE_STRIPE_PRICE_PRO_MONTHLY as string,
@@ -88,6 +91,8 @@ const PLANS: Plan[] = [
 export default function PricingPage() {
   const navigate = useNavigate();
   const { isSignedIn, getToken } = useAuth();
+  const userStatus = useUserStatus();
+  const currentPlan = isSignedIn ? userStatus.plan : null;
   const [billing, setBilling] = useState<Billing>("monthly");
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -102,6 +107,13 @@ export default function PricingPage() {
       return;
     }
 
+    // Already on this plan — go to account
+    const planKey = plan.name.toLowerCase() as "pro" | "unlimited";
+    if (currentPlan === planKey) {
+      navigate("/account");
+      return;
+    }
+
     const priceId = billing === "monthly" ? plan.priceIdMonthly : plan.priceIdAnnual;
     setLoading(priceId);
     try {
@@ -110,6 +122,20 @@ export default function PricingPage() {
     } catch {
       setLoading(null);
     }
+  }
+
+  function getPlanCta(plan: Plan): string {
+    if (!isSignedIn || !currentPlan) return plan.cta;
+    const planKey = plan.name.toLowerCase();
+    if (currentPlan === planKey) return "Current plan";
+    if (planKey === "free") return "Downgrade";
+    if (PLAN_ORDER[planKey] > PLAN_ORDER[currentPlan]) return `Upgrade to ${plan.name}`;
+    return `Switch to ${plan.name}`;
+  }
+
+  function isPlanCurrent(plan: Plan): boolean {
+    if (!currentPlan) return false;
+    return plan.name.toLowerCase() === currentPlan;
   }
 
   return (
@@ -255,16 +281,16 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handlePlanClick(plan)}
-                disabled={!!loading}
+                disabled={!!loading || isPlanCurrent(plan)}
                 style={{
-                  background: plan.highlighted ? "var(--accent-dim)" : "var(--ink)",
-                  color: "#fff",
-                  border: "none",
+                  background: isPlanCurrent(plan) ? "transparent" : plan.highlighted ? "var(--accent-dim)" : "var(--ink)",
+                  color: isPlanCurrent(plan) ? "var(--ink-4)" : "#fff",
+                  border: isPlanCurrent(plan) ? "1px solid var(--border)" : "none",
                   borderRadius: "8px",
                   padding: "12px",
                   fontWeight: 600,
                   fontSize: "14px",
-                  cursor: loading ? "not-allowed" : "pointer",
+                  cursor: (loading || isPlanCurrent(plan)) ? "not-allowed" : "pointer",
                   opacity: loading && !isLoading ? 0.6 : 1,
                   display: "flex",
                   alignItems: "center",
@@ -274,7 +300,7 @@ export default function PricingPage() {
                 }}
               >
                 {isLoading && <Loader2 size={14} className="iq-spin" />}
-                {plan.cta}
+                {getPlanCta(plan)}
               </button>
             </div>
           );

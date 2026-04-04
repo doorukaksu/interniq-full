@@ -1,6 +1,6 @@
-/* InternIQ v2 Typefaces
-   DM Sans      — display, headlines, UI (geometric, premium sans)
+/* InternIQ Typefaces
+   Nunito Sans  — display, headlines, UI (rounded, human-friendly)
    JetBrains Mono — data labels, code, mono elements
 */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
