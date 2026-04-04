@@ -51,13 +51,23 @@ class AnalyzeResponse(BaseModel):
     success: bool
     result: AnalysisResult | None = None
     error: str | None = None
+    is_partial: bool = False  # True for free-tier users — some fields are masked
 
 
-# ─── Waitlist ─────────────────────────────────────────────────────────────────
+# ─── Payments ─────────────────────────────────────────────────────────────────
 
-class WaitlistRequest(BaseModel):
-    email: str
+class CheckoutRequest(BaseModel):
+    price_id: str
+    mode: Literal["subscription", "payment"]
 
-class WaitlistResponse(BaseModel):
-    success: bool
-    message: str
+
+class CheckoutResponse(BaseModel):
+    url: str
+
+
+class PaymentStatusResponse(BaseModel):
+    plan: Literal["free", "pro", "unlimited"]
+    sub_status: str
+    topup_credits: int
+    weekly_used: int
+    lifetime_used: int

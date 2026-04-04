@@ -1,25 +1,39 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Upload, ArrowLeft, Loader2, RotateCcw, ShieldCheck, FileText, LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { analyzeCV } from "../lib/api";
 import AnalysisResults from "./AnalysisResults";
+import UpgradeModal from "./UpgradeModal";
+import { useUserStatus } from "../hooks/useUserStatus";
 import type { AnalysisResult } from "../types/analysis";
 
 type AppState = "idle" | "analyzing" | "results" | "error";
+type UpgradeReason = "free_limit_reached" | "pro_weekly_limit_reached";
 
 export default function OptimizePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { getToken, signOut } = useAuth();
   const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const userStatus = useUserStatus();
 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [isPartial, setIsPartial] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
+
+  // Refetch status after a successful Stripe checkout redirect
+  useEffect(() => {
+    if (searchParams.get("checkout") === "success") {
+      userStatus.refetch();
+    }
+  }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,13 +80,22 @@ export default function OptimizePage() {
       const response = await analyzeCV(uploadedFile, jobDescription, getToken);
       if (response.success && response.result) {
         setResult(response.result);
+        setIsPartial(response.is_partial ?? false);
         setAppState("results");
+        userStatus.refetch();
       } else {
         throw new Error(response.error ?? "Analysis failed.");
       }
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
-      setAppState("error");
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      // Usage limit errors — show upgrade modal instead of inline error
+      if (msg === "free_limit_reached" || msg === "pro_weekly_limit_reached") {
+        setUpgradeReason(msg as UpgradeReason);
+        setAppState("idle");
+      } else {
+        setErrorMessage(msg);
+        setAppState("error");
+      }
     }
   };
 
@@ -89,7 +112,23 @@ export default function OptimizePage() {
     user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ??
     "there";
 
+  // Usage counter label shown in nav
+  const usageLabel = (() => {
+    if (userStatus.isLoading) return null;
+    if (userStatus.plan === "pro") return `${userStatus.weekly_used}/10 this week`;
+    if (userStatus.plan === "free") return `${userStatus.lifetime_used}/1 free`;
+    return null; // unlimited — no counter needed
+  })();
+
   return (
+    <>
+      {upgradeReason && (
+        <UpgradeModal
+          reason={upgradeReason}
+          topupCredits={userStatus.topup_credits}
+          onClose={() => setUpgradeReason(null)}
+        />
+      )}
     <div className="iq-root" style={{ backgroundImage: "none", background: "var(--bg)" }}>
       <div className="iq-top-rule" />
 
@@ -112,6 +151,18 @@ export default function OptimizePage() {
             <button onClick={() => navigate("/")} className="iq-btn-ghost">
               <ArrowLeft size={13} /> Home
             </button>
+            {usageLabel && (
+              <span style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                color: "var(--ink-4)",
+                padding: "4px 8px",
+                background: "var(--bg-sunken)",
+                borderRadius: "var(--radius-sm)",
+              }}>
+                {usageLabel}
+              </span>
+            )}
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -378,5 +429,6 @@ export default function OptimizePage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

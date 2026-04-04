@@ -22,12 +22,16 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-CLERK_ISSUER = os.environ.get(
-    "CLERK_ISSUER",
-    "https://complete-camel-27.clerk.accounts.dev",
-)
+CLERK_ISSUER = os.environ.get("CLERK_ISSUER")
+
+if not CLERK_ISSUER:
+    raise RuntimeError(
+        "CLERK_ISSUER environment variable is not set. "
+        "Add it to your .env file (dev) or Vercel dashboard (production)."
+    )
 
 JWKS_URL = f"{CLERK_ISSUER}/.well-known/jwks.json"
+
 
 # Bearer token extractor — auto_error=False so we can return clean 401s
 _bearer = HTTPBearer(auto_error=False)

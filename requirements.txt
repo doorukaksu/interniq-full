@@ -9,3 +9,7 @@ python-dotenv
 # Clerk JWT verification
 python-jose[cryptography]
 httpx
+# Supabase (pinned below 2.20 to avoid storage3→pyiceberg build dependency on Windows)
+supabase==2.10.0
+# Stripe
+stripe

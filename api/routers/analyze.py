@@ -1,12 +1,18 @@
 from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from api.models import AnalyzeResponse
+from api.models import AnalyzeResponse, AnalysisResult
 from api.services.cv_parser import extract_text_from_pdf
 from api.services.analyzer import analyse_cv
 from api.services.rate_limiter import rate_limiter
 from api.services.file_validator import validate_pdf
 from api.services.clerk_auth import require_auth
+from api.services.user_service import (
+    get_or_create_user,
+    check_analysis_allowed,
+    record_usage,
+    get_user,
+)
 
 router = APIRouter()
 
@@ -20,6 +26,29 @@ def _get_client_ip(request: Request) -> str:
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
+
+
+def _apply_partial_mask(result: AnalysisResult) -> AnalysisResult:
+    """
+    Strip gated fields from the result for free-tier users.
+
+    Free users see: ATS score/grade/summary, 1 bullet improvement.
+    Everything else is replaced with empty/null so the frontend can
+    render blurred placeholder sections.
+    """
+    from api.models import KeywordAnalysis, BulletFeedback
+
+    masked_keywords = KeywordAnalysis(matched=[], missing=[], recommended=[])
+    first_bullet = result.bullets[:1] if result.bullets else []
+
+    return AnalysisResult(
+        ats=result.ats,
+        keywords=masked_keywords,
+        bullets=first_bullet,
+        sections=[],
+        overall_suggestions=[],
+        top_priorities=[],
+    )
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
@@ -37,12 +66,34 @@ async def analyze(
     Rate limited to 5 requests per IP per hour.
     CV bytes are processed in memory and never persisted.
     Returns ATS score, keyword gaps, bullet improvements, and section scores.
+    Free tier receives partial results only.
     """
 
-    # user["sub"] is the Clerk user ID — available for usage tracking in Phase 2
-    user_id: str = user["sub"]
+    clerk_id: str = user["sub"]
+    # Clerk embeds email in the JWT under the "email" claim (if configured)
+    email: str = user.get("email", "")
 
-    # ── Rate limiting (by IP — user-level limiting comes in Phase 2) ──────────
+    # ── Ensure user row exists ─────────────────────────────────────────────────
+    get_or_create_user(clerk_id, email)
+
+    # ── Usage check ────────────────────────────────────────────────────────────
+    allowed_result = check_analysis_allowed(clerk_id)
+
+    if not allowed_result["allowed"]:
+        reason = allowed_result["reason"]
+        if reason == "free_limit_reached":
+            raise HTTPException(
+                status_code=402,
+                detail="free_limit_reached",
+            )
+        if reason == "pro_weekly_limit_reached":
+            raise HTTPException(
+                status_code=402,
+                detail="pro_weekly_limit_reached",
+            )
+        raise HTTPException(status_code=402, detail="usage_limit_reached")
+
+    # ── Rate limiting (IP-based, secondary guard) ──────────────────────────────
     client_ip = _get_client_ip(request)
     allowed, retry_after = rate_limiter.is_allowed(client_ip)
 
@@ -77,10 +128,22 @@ async def analyze(
     finally:
         del cv_text
 
-    # ── Response with rate limit headers ──────────────────────────────────────
+    # ── Record usage ───────────────────────────────────────────────────────────
+    db_user = get_user(clerk_id)
+    plan: str = db_user.get("plan", "free")
+    used_topup: bool = allowed_result["used_topup"]
+    record_usage(clerk_id, plan, used_topup)
+
+    # ── Apply partial mask for free tier ──────────────────────────────────────
+    is_partial = plan == "free"
+    if is_partial:
+        result = _apply_partial_mask(result)
+
+    # ── Response ───────────────────────────────────────────────────────────────
     remaining = rate_limiter.remaining(client_ip)
+    response_data = AnalyzeResponse(success=True, result=result, is_partial=is_partial)
     return JSONResponse(
-        content=AnalyzeResponse(success=True, result=result).model_dump(),
+        content=response_data.model_dump(),
         headers={
             "X-RateLimit-Limit": str(rate_limiter.max_requests),
             "X-RateLimit-Remaining": str(remaining),

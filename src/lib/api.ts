@@ -11,6 +11,8 @@
 
 const API_BASE = "/api";
 
+// ── Analysis ──────────────────────────────────────────────────────────────────
+
 export async function analyzeCV(
   cvFile: File,
   jobDescription: string,
@@ -42,13 +44,17 @@ export async function analyzeCV(
   return response.json();
 }
 
-export async function joinWaitlist(
-  email: string,
-): Promise<{ success: boolean; message: string }> {
-  const response = await fetch(`${API_BASE}/waitlist`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+
+// ── Payments ──────────────────────────────────────────────────────────────────
+
+export async function getPaymentStatus(
+  getToken: () => Promise<string | null>,
+): Promise<PaymentStatus> {
+  const token = await getToken();
+  if (!token) throw new Error("No active session.");
+
+  const response = await fetch(`${API_BASE}/payments/status`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
@@ -59,7 +65,53 @@ export async function joinWaitlist(
   return response.json();
 }
 
-// ── Types (duplicated here so api.ts is self-contained) ───────────────────────
+export async function createCheckout(
+  priceId: string,
+  mode: "subscription" | "payment",
+  getToken: () => Promise<string | null>,
+): Promise<string> {
+  const token = await getToken();
+  if (!token) throw new Error("No active session.");
+
+  const response = await fetch(`${API_BASE}/payments/checkout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ price_id: priceId, mode }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail ?? `Server error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.url as string;
+}
+
+export async function getBillingPortal(
+  getToken: () => Promise<string | null>,
+): Promise<string> {
+  const token = await getToken();
+  if (!token) throw new Error("No active session.");
+
+  const response = await fetch(`${API_BASE}/payments/portal`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail ?? `Server error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.url as string;
+}
+
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface ATSScore {
   score: number;
@@ -98,4 +150,13 @@ interface AnalyzeResponse {
   success: boolean;
   result?: AnalysisResult;
   error?: string;
+  is_partial?: boolean;
+}
+
+export interface PaymentStatus {
+  plan: "free" | "pro" | "unlimited";
+  sub_status: string;
+  topup_credits: number;
+  weekly_used: number;
+  lifetime_used: number;
 }

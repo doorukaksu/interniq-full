@@ -37,6 +37,7 @@ export default function HomePage() {
           <div className="iq-nav-links">
             <a href="#features" className="iq-nav-link">Features</a>
             <a href="#how-it-works" className="iq-nav-link">How it works</a>
+            <a onClick={() => navigate('/pricing')} className="iq-nav-link" style={{ cursor: 'pointer' }}>Pricing</a>
             {isSignedIn ? (
               <>
                 <button onClick={() => navigate('/optimize')} className="iq-nav-cta">
@@ -264,6 +265,7 @@ export default function HomePage() {
           </div>
           <p className="iq-footer-copy">© 2026 InternIQ</p>
           <div className="iq-footer-links">
+            <a href="/pricing" className="iq-footer-link">Pricing</a>
             <a href="/privacy" className="iq-footer-link">Privacy</a>
             <a href="/terms" className="iq-footer-link">Terms</a>
           </div>
