@@ -153,6 +153,24 @@ interface AnalyzeResponse {
   is_partial?: boolean;
 }
 
+export async function deleteAccount(
+  getToken: () => Promise<string | null>,
+): Promise<void> {
+  const token = await getToken();
+  if (!token) throw new Error("No active session.");
+
+  const response = await fetch(`${API_BASE}/account`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail ?? `Server error: ${response.status}`);
+  }
+}
+
+
 export interface PaymentStatus {
   plan: "free" | "pro" | "unlimited";
   sub_status: string;

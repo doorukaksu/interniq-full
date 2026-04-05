@@ -346,7 +346,9 @@ export default function OptimizePage() {
               <span>
                 Your CV is processed in memory and{" "}
                 <strong style={{ color: "var(--ink-2)", fontWeight: 600 }}>never stored</strong>.
-                Deleted immediately after analysis.{" "}
+                Analysis is performed by{" "}
+                <strong style={{ color: "var(--ink-2)", fontWeight: 600 }}>Anthropic Claude API (US-based)</strong>
+                {" "}and deleted immediately after.{" "}
                 <a href="/privacy" style={{ color: "var(--accent-dim)", textDecoration: "underline" }}>
                   Privacy policy
                 </a>

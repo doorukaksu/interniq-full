@@ -5,6 +5,7 @@ POST /api/payments/checkout  — create a Stripe checkout session
 POST /api/payments/webhook   — Stripe webhook (no auth, sig-verified)
 GET  /api/payments/portal    — return billing portal URL
 GET  /api/payments/status    — return current user plan + usage counts
+DELETE /api/account          — permanently delete user data (GDPR Article 17)
 """
 
 import os
@@ -18,7 +19,7 @@ from api.models import (
     PaymentStatusResponse,
 )
 from api.services.clerk_auth import require_auth
-from api.services.user_service import get_or_create_user, get_user, get_usage_counts
+from api.services.user_service import get_or_create_user, get_user, get_usage_counts, delete_user
 from api.services.stripe_service import (
     create_checkout_session,
     create_billing_portal,
@@ -100,3 +101,19 @@ async def payment_status(
         weekly_used=counts["weekly"],
         lifetime_used=counts["lifetime"],
     )
+
+
+@router.delete("/account")
+async def delete_account(user: dict = Depends(require_auth)) -> JSONResponse:
+    """
+    Permanently delete the authenticated user's data from Supabase.
+
+    Removes: user row, all usage records, subscription status, top-up credits.
+    CV content is never stored so requires no deletion action.
+    Stripe payment records are retained as required by financial regulation.
+
+    UK GDPR Article 17 — Right to Erasure.
+    """
+    clerk_id: str = user["sub"]
+    delete_user(clerk_id)
+    return JSONResponse(content={"deleted": True})

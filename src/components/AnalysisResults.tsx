@@ -219,6 +219,17 @@ export default function AnalysisResults({ result, isPartial = false, column }: P
           </Section>
         )}
 
+        {/* ── Bullet Improvements (moved from left column) ─────────────── */}
+        {result.bullets?.length > 0 && (
+          <Section label={`Bullet improvements · ${result.bullets.length}`}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {result.bullets.map((b, i) => (
+                <BulletItem key={i} bullet={b} index={i} />
+              ))}
+            </div>
+          </Section>
+        )}
+
         {isPartial ? <LockedSection label="Keyword analysis" /> : (
           <Section label="Keyword analysis">
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -252,23 +263,6 @@ export default function AnalysisResults({ result, isPartial = false, column }: P
             </div>
           </Section>
         )}
-
-        {isPartial ? <LockedSection label="Section scores" /> : result.sections?.length > 0 ? (
-          <Section label="Section scores">
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {result.sections.map(s => (
-                <div key={s.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink-2)" }}>{s.name}</span>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: scoreColor(s.score), fontWeight: 600 }}>{s.score}</span>
-                  </div>
-                  <ScoreBar score={s.score} />
-                  <p style={{ fontSize: "12px", color: "var(--ink-4)", marginTop: "5px", lineHeight: 1.5 }}>{s.feedback}</p>
-                </div>
-              ))}
-            </div>
-          </Section>
-        ) : null}
 
         {isPartial ? <LockedSection label="Overall suggestions" /> : overallSuggestions.length > 0 ? (
           <Section label="Overall suggestions">
@@ -354,16 +348,23 @@ export default function AnalysisResults({ result, isPartial = false, column }: P
         </p>
       </div>
 
-      {/* ── Bullet Improvements ──────────────────────────────────────── */}
-      {result.bullets?.length > 0 && (
-        <Section label={`Bullet improvements · ${result.bullets.length}`}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {result.bullets.map((b, i) => (
-              <BulletItem key={i} bullet={b} index={i} />
+      {/* ── Section Scores ────────────────────────────────────────────── */}
+      {isPartial ? <LockedSection label="Section scores" /> : result.sections?.length > 0 ? (
+        <Section label="Section scores">
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {result.sections.map(s => (
+              <div key={s.name}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink-2)" }}>{s.name}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: scoreColor(s.score), fontWeight: 600 }}>{s.score}</span>
+                </div>
+                <ScoreBar score={s.score} />
+                <p style={{ fontSize: "12px", color: "var(--ink-4)", marginTop: "5px", lineHeight: 1.5 }}>{s.feedback}</p>
+              </div>
             ))}
           </div>
         </Section>
-      )}
+      ) : null}
 
     </div>
   );

@@ -142,3 +142,15 @@ def get_usage_counts(clerk_id: str) -> dict:
         "weekly": weekly_result.data or 0,
         "lifetime": free_result.data or 0,
     }
+
+
+def delete_user(clerk_id: str) -> None:
+    """
+    Hard-delete all user data from Supabase.
+
+    Deletes usage records first (FK constraint), then the user row.
+    CV content is never stored so requires no deletion action.
+    """
+    sb = get_supabase()
+    sb.table("usage").delete().eq("clerk_id", clerk_id).execute()
+    sb.table("users").delete().eq("clerk_id", clerk_id).execute()

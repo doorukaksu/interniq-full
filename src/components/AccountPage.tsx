@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowLeft, Loader2, CreditCard, Zap, LogOut } from "lucide-react";
+import { ArrowLeft, Loader2, CreditCard, Zap, LogOut, Trash2 } from "lucide-react";
 import { useUserStatus } from "../hooks/useUserStatus";
-import { getBillingPortal, createCheckout } from "../lib/api";
+import { getBillingPortal, createCheckout, deleteAccount } from "../lib/api";
 
 const PRICES = {
   UNLIMITED_MONTHLY: import.meta.env.VITE_STRIPE_PRICE_UNLIMITED_MONTHLY as string,
@@ -19,6 +19,9 @@ export default function AccountPage() {
   const status = useUserStatus();
   const [portalLoading, setPortalLoading] = useState(false);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const displayName =
     user?.firstName ??
@@ -38,6 +41,19 @@ export default function AccountPage() {
       window.location.href = url;
     } catch {
       setPortalLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteLoading(true);
+    setDeleteError("");
+    try {
+      await deleteAccount(getToken);
+      await signOut();
+      navigate("/");
+    } catch {
+      setDeleteError("Deletion failed. Please try again or contact privacy@interniq.co.uk.");
+      setDeleteLoading(false);
     }
   }
 
@@ -255,6 +271,112 @@ export default function AccountPage() {
               </div>
             );
           })}
+        </div>
+      </Row>
+
+      <div className="iq-thick-rule" />
+
+      {/* Section — Data & Privacy */}
+      <Row label="04 · Data & Privacy">
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "560px" }}>
+          <div>
+            <p style={{ fontSize: "14px", color: "var(--ink-2)", marginBottom: "6px" }}>
+              Your CV content is never stored — it is deleted immediately after each analysis.
+            </p>
+            <p style={{ fontSize: "13px", color: "var(--ink-4)", fontFamily: "var(--font-mono)", lineHeight: 1.6 }}>
+              Account data (email, usage records, subscription) is stored in our database and
+              can be permanently deleted below. See our{" "}
+              <a href="/privacy" style={{ color: "var(--accent-dim)", textDecoration: "underline" }}>
+                Privacy Policy
+              </a>{" "}
+              for full details including our sub-processors.
+            </p>
+          </div>
+
+          {!deleteConfirm ? (
+            <button
+              onClick={() => setDeleteConfirm(true)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "none",
+                border: "1px solid rgba(239,68,68,0.3)",
+                borderRadius: "var(--radius-sm)",
+                color: "#dc2626",
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                width: "fit-content",
+                transition: "background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease)",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "rgba(239,68,68,0.06)";
+                e.currentTarget.style.borderColor = "rgba(239,68,68,0.5)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "none";
+                e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+              }}
+            >
+              <Trash2 size={12} />
+              Delete my account
+            </button>
+          ) : (
+            <div style={{
+              border: "1px solid rgba(239,68,68,0.3)",
+              borderRadius: "var(--radius)",
+              padding: "20px",
+              background: "rgba(239,68,68,0.04)",
+            }}>
+              <p style={{ fontSize: "14px", fontWeight: 600, color: "#dc2626", marginBottom: "8px" }}>
+                Permanently delete your account?
+              </p>
+              <p style={{ fontSize: "13px", color: "var(--ink-4)", fontFamily: "var(--font-mono)", lineHeight: 1.6, marginBottom: "16px" }}>
+                This will permanently remove your account, usage records, and subscription status.
+                This action cannot be undone. Stripe payment records are retained as required
+                by financial regulation.
+              </p>
+              {deleteError && (
+                <p style={{ fontSize: "12px", color: "#dc2626", marginBottom: "12px", fontFamily: "var(--font-mono)" }}>
+                  {deleteError}
+                </p>
+              )}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteLoading}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: "#dc2626",
+                    border: "none",
+                    borderRadius: "var(--radius-sm)",
+                    color: "#fff",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    padding: "8px 16px",
+                    cursor: deleteLoading ? "not-allowed" : "pointer",
+                    opacity: deleteLoading ? 0.7 : 1,
+                  }}
+                >
+                  {deleteLoading ? <Loader2 size={12} className="iq-spin" /> : <Trash2 size={12} />}
+                  {deleteLoading ? "Deleting..." : "Yes, delete everything"}
+                </button>
+                <button
+                  onClick={() => { setDeleteConfirm(false); setDeleteError(""); }}
+                  disabled={deleteLoading}
+                  className="iq-btn-ghost"
+                  style={{ fontSize: "12px" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </Row>
 

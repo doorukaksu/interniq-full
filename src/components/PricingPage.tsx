@@ -283,8 +283,8 @@ export default function PricingPage() {
                 onClick={() => handlePlanClick(plan)}
                 disabled={!!loading || isPlanCurrent(plan)}
                 style={{
-                  background: isPlanCurrent(plan) ? "transparent" : plan.highlighted ? "var(--accent-dim)" : "var(--ink)",
-                  color: isPlanCurrent(plan) ? "var(--ink-4)" : "#fff",
+                  background: isPlanCurrent(plan) ? "transparent" : plan.highlighted ? "var(--accent-dim)" : "var(--bg-sunken, #e8e8e9)",
+                  color: isPlanCurrent(plan) ? "var(--ink-4)" : plan.highlighted ? "#fff" : "var(--ink)",
                   border: isPlanCurrent(plan) ? "1px solid var(--border)" : "none",
                   borderRadius: "8px",
                   padding: "12px",
